@@ -1,0 +1,177 @@
+Types of subqueries:
+1. Scalar Subquery
+2. Multiple row Subquery
+3. Correlated Subquery
+
+
+---Scalar Subquery
+return one row and one column (Scalar subquery is not only used in where clause it can be used in different ways).
+Example 1:
+select * --- outer query/ main query
+from employee
+where salary > (select avg(salary) from employee); -- subquery/ inner query
+
+Example 2:
+select *
+from employee e
+join (select avg(salary) sal from employee) avg_sal -- this scalar subquery in join clause is treated as one table
+on e.salary > avg_sal.sal;
+
+---Multiple row subquery
+if subquery return multiple rows
+-- subquery which returns multiple column and multiple row.
+-- subquery which returns only 1 column and multiple rows.
+
+example:
+find the employees who earn the highest salary in each department.
+
+select * 
+from employee
+where (dept_name, salary) in (select dept_name, max(salary) from employee group by dept_name);
+
+
+------ Single column multiple row subquery
+
+Find department who do not have any employee
+
+select * form department
+where dept_name not in (select distinct dept_name from employee);
+
+
+----- Correlated subquery
+A subquery which is related to the outer query.
+by name it means it's subquery related to the outer query.
+processing of the sub query depends on the values that are returned from the outer query.
+example:
+
+Find the employees in each department who earn more that the average salary in the department.
+
+select *
+from employee e
+where e.salary > (select avg(ie.salary) from employee ie
+where ie.dept_name = e.dept_name);
+
+
+Find departments who do not have any employees?
+
+select * 
+from department d
+where not exists (select 1 from employee e 
+where e.dept_name = d.dept_name);
+
+---Nested subquery
+
+Find stores who's sales where better than the average sales across all stores?
+1. Find the total sales for each store.
+2. find avg sales for all the stores
+3. compare 1 & 2
+
+select * 
+from (select store_name, sum(price) as total_sales
+      from sales
+      group by store_name) sales
+join (select avg(total_sales) as sales
+      from (select store_name, sum(price) as total_sales
+            from sales
+            group by store_name) x) avg_sales
+      on sales.total_sales > avg_sales.sales;
+
+
+If there are repeated subquery it is perfect to use WITH clause
+
+with sales as 
+(select store_name, sum(price) as total_sales
+from sales
+group by store_name)
+select from sales
+join (select avg(total_sales) as sales
+from sales x) avg_sales
+on sales.total_sales > avg_sales.sales;
+
+
+-SELECT
+-FROM
+-WHERE
+-HAVING
+
+-- USING a subquery in SELECT clause.
+Fetch all employee details and add remarks to those employees who earn more than the average pay.
+
+select *,
+(case when salary>(select avg(salary) from employee) then 'Higher than average'
+else null
+end) as remarks from employee e;
+
+or better ways writing this is:
+
+select *,
+(case when salary > avg_sal.sal
+then 'Higher than average'
+else null
+end) as remarks
+from employee 
+cross join (select avg(salary) sal from employee) avg_sal;
+
+
+-- HAVING CLAUSE
+Find the stores who have sold more units than the average units sold by all stores?
+
+
+select store_name, sum(quantity)
+from sales
+group by store_name
+having sum(quantity) > (select avg(quantity) from sales);
+
+
+-INSERT
+-UPDATE
+-DELETE
+
+-- using INSERT clause
+Insert data to employee history table. Make sure not insert duplicate records.
+
+Insert into employee_history
+select e.emp_id, e.emp_name, d.dept_name, e.salary, d.location
+from employee e
+join department d on d.dept_name = e.dept_name
+where not exists (select 1 from employee_history eh where eh.emp_id = e.emp_id);
+
+
+
+--Using UPDATE clause
+Give 10% increment to all employees in Bangalore location based on the maximum salary earned by a employee in each dept. Only consider employees in employee_history table.
+
+
+update employee e
+set salary = (select max(salary) + (max(salary) * 0.1)
+from employee_history eh
+where eh.dept_name = e.dept_name)
+where e.dept_name = (select dept_name from department where location = 'Bangalore') 
+and e.emp_id in (select emp_id from employee_history);
+
+
+--Using DELETE clause
+Delete all departments who do not have any employees?
+
+Delete from department
+where dept_name in (select dept_name from department d
+where not exists (select 1 from employee e 
+where e.dept_name = d.dept_name));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
