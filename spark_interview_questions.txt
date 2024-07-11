@@ -1,0 +1,103 @@
+How do you configure Spark to run on a cluster?
+
+You can configure Spark using spark-submit with parameters like --master, --deploy-mode, --executor-memory, --total-executor-cores, etc.
+
+What are some common Spark configurations you might tune for performance?
+
+spark.executor.memory
+spark.executor.cores
+spark.driver.memory
+spark.sql.shuffle.partitions
+spark.default.parallelism
+
+How do you debug a slow PySpark job?
+
+Use the Spark UI to check the DAG (Directed Acyclic Graph) and identify stages that are slow.
+Check for skewed data or tasks taking longer than others.
+Profile the job with logs and metrics to pinpoint bottlenecks.
+
+Explain the concept of lineage in Spark?
+
+Lineage tracks the series of transformations and actions that lead to the creation of an RDD, enabling fault tolerance by allowing recomputation of lost data.
+
+Explain how to use window functions in PySpark?
+
+from pyspark.sql.window import window
+from pyspark.sql.functions import row_number
+
+window_spec = Window.partitionBy("group_column").orderBy("order_column")
+df = df.withColumn("row_number", row_number().over(window_spec))
+df.show()
+
+
+Start a spark session
+
+from pyspark.sql import Sparksession
+
+spark = sparksession.builder.appName('Practice').getOrCreate()
+df=spark.read.csv("filename.csv").option('header','true').option('inferschema','true')
+
+df.spark.createDataFrame(data,schema=columns)
+df.printSchema()
+df.show(5)
+df.columns
+df.head(4)
+df.describe().show()
+
+selecting columns
+df.select('name_col').show()
+df.select(df["column1"], df["column2"]).show()
+df.select(['name_col1','name_col2']).show()
+
+filtering columns
+df.filter(df["column_name"] > 10).show()
+df.filter(df["column_name"].like("%patten%")).show()
+
+df.withcoloumn('new_col_name',df['col_name']*2)
+df.drop(['col1','col2']).show()
+df.withcolumnRenamed('from_name','to_name')
+df.na.drop()
+df.na.drop(how='any/all',thres=2,subset=['age','name'])
+df.na.fill("missing values",['age','name']).show()
+df.filter((df['salary']<=2000) &/| (df['salary')>=1500)).select('name','age').show()
+df.groupby('name').sum().max().min().mean().count()
+df.groupby('depatment').agg({'salary':'sum'})
+
+join operations
+
+joined_df = df1.join(df2, df1["id"] == df2["id"], "inner")
+joined_df.show()
+
+df.cache()
+df.unpersist()
+
+PySpark Performance Tuning
+
+spark = SparkSession.builder \
+    .appName("OptimizedApp") \
+    .config("spark.executor.memory", "4g") \
+    .config("spark.executor.cores", "2") \
+    .config("spark.sql.shuffle.partitions", "200") \
+    .getOrCreate()
+
+How do you debug a PySpark application?
+
+Use Spark UI to monitor stages and tasks.
+Check logs for errors and performance issues.
+Use explain() method on DataFrames to view execution plans.
+Use tools like Ganglia and Graphite for monitoring cluster performance.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

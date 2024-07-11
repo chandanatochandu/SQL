@@ -1,0 +1,231 @@
+1. Find the employee with the highest salary in each department.
+
+select departmentID, EmployeeID, Salary
+From employee e1
+where salary = (select max(salary) from employee e2 where
+e2.departmentID = e1.DepartementID);
+
+2. Get the third highest salary from the employee table.
+
+select distinct salary from employee
+order by salary DESC 
+LIMIT 1 OFFSET 2;
+
+3.Find all employees who were hired in the last 30 days;
+
+select * from employee 
+where hiredate >= CURDATE() - INTERVAL 30 day;
+
+4. Write a query to get the department-wise average salary.
+
+select dept_id, AVG(salary) AS AverageSalary from employee 
+group by DepartmentID;
+
+5. Retrieve the list of employees who do not have any subordinates
+
+select e1.employeeID, e1.EmployeeName
+From Employee e1
+Left join Employee e2 on e1.EmployeeID = e2.ManagerID
+where e2.employeeID is NULL;
+
+6. Find the duplicate records in a table
+
+select column1, column2, COUNT(*) from tableName
+group by column1, column2 having count(*)>1;
+
+7. Delete duplicate records from a table while keeping one instance of the record.
+
+Delete from employee
+where emp_id not in ( select min(emp_id) from employee 
+group by Name, Department, Salary);
+
+8. Write a query to fetch the common records between two tables.
+
+select e1.*
+from employee e1
+inner join employee e2 on e1.employeeID = e2.employeeID;
+
+9. Find the employees whose salary is above the average salary.
+
+select * from employee where salary > ( select avg(salary) from employee);
+
+10. Write a query to transpose rows into columns.
+
+
+11. Write a query to display the first name and the number of projects each employee is handling.
+
+select e.first_name, count(p.projectID) as projectcount
+from employee e
+left join projectAssignment p on e.employeeID=p.employeeID
+group by e.first_name;
+
+12. Retrieve the names of employees who work in more than one department.
+
+select FirstName from employee e join departmentEmployee de 
+on e.EmployeeID = de.EmployeeID
+group by e.FirstName
+Having count(distinct de.departmentID)>1;
+
+13. Write a query to list all employees along with their manager's name.
+
+select e1.emp_name, e2.emp_name as manager_name from 
+employee e1 left join employee e2
+on e1.ManagerId = e2.EmployeeID;
+
+14. Find the employees who have the same job title as their manager.
+
+select e.EmployeeName 
+from Employee e join employee m on e.ManagerID = m.EmployeeID
+where e.jobtitle = m.jobtitle;
+
+15. Write a query to find the maximum total salary by department.
+
+select department_id, max(total_salary) from 
+( select department_id, sum(salary) AS total_salary from employee group by department_id) as DepartmentSalaries;
+
+16. Write a query to find the nth highest salary from the employee table.
+
+select distinct salary from employee 
+order by salary DESC 
+LIMIT 1 OFFSET n-1;
+
+17. List all employees who have a manager in the same department.
+
+select * from employee e1 left join employee e2
+on e1.empId = e2.empID where e1.departmentID = e2.departmentID;
+
+18. Write a query to get the department with the maximum number of employees.
+
+select department_id, department_name from department 
+group by depatment_id
+order by count(employeeid) desc
+LIMIT 1;
+
+19. Find the employees who joined in the same year as their manager.
+
+select e1.EmployeeName 
+from employee e1
+join employee e2 on e1.ManagerId = e2.EmployeeId
+where YEAR(e1.HireDate) = YEAR(e2.HireDate);
+
+20. Write a query to find the employee with the second highest salary in each department
+
+select departmentID, EmployeeID, salary
+from ( select departmentId, EmployeeID, salary, 
+Row_number() over ( partition by departmentID order by salary desc) as rn
+from employee) as Ranked
+where rn=2;
+
+21. Get the list of employees who have worked for the company for more than 5 years.
+
+select employeename from employee
+where DATEDIFF(CURDATE(), HireDate) > 5 * 365;
+
+22. Find all employees whose names start with 'A' and end with 'N'?
+
+select * from employee where employeename like 'A%N';
+
+23. Write a query to find employees with the same job title but in different departments?
+
+select * from employee e1
+join employee e2 on e1.jobtitle = e2.jobtitle and e1.departmentid <> e2.departmentid;
+
+24. List all employees who are not assigned to any project?
+
+select e.employeename from employee e
+left join projectAssignment p on e.employeeID = p.employeeID
+where p.projectID is null;
+
+25. Write a query to get the total salary paid to employees in each department.
+
+select departmentid, sum(salary) from employee group by departmentid;
+
+26. Retrieve the employee details who earn more than the average salary in their department.
+
+select e.empname,e.salary from employee e 
+join (select departmentid, avg(salary) as avgsalary from employee group by departmentid)
+as deptavg on e.departmentId = deptavg.departmentid
+where e.salary > deptavg.avgsalary;
+
+27. Find the departments where the average salary is greater than a certain amount?
+
+select departmentid from employee group by departmentid having avg(salary) > 5000;
+
+28. write a query to find employees who are also mangers?
+
+select empname from employee e1
+inner join employee e2 on e1.empid = e2.managerid;
+
+29. List employees with their job titles and the number of people they manage?
+
+select e.empolyeename, e.jobtitle, count(m.employeeid) as numberofsubordinates
+from employee e 
+left join employee m on e.employeeid = m.managerid
+group by e.employeeid, e.jobtitle;
+
+30. Write a query to find employees who do not have a manager
+
+select employeename from employe where managerid is null;
+
+More queries on joins
+
+31. Find the name of employees and their respective department names?
+
+select e.empName, d.deptName from employee e 
+inner join  department d on e.deptid = d.deptpid;
+
+32.List all employees along with their manager's name (self join)?
+
+select e.empname, m.empname from employee e 
+left join employee m on m.empid = e.managerid
+
+33. Retrieve a list of all projects along with the employees assigned to each project?
+
+select p.projectName, e.EmployeeName
+from project p
+inner join projectassignment pa on p.projectid = pa.projectid
+inner join employee e on pa.employeeid = e.employeeid;
+
+34. Get a list of employees who are not assigned to any project
+
+select e.empName from employee e
+left join projectAssignment pa on e.empId = pa.empID
+where pa.projectID is null;
+
+35. List all departments and the number of employees in each department 
+
+select d.departmentid, count(e.employeeid) from employee e 
+right join department d on e.depatmentid = d.departmentid 
+group by d.departmentid;
+
+36. Find employees who work in a department but are not managers.
+
+select e.empname, d.departmentName from employee e
+inner join department d on e.departmentID = d.departmentId
+where e.employeeid not in (select distinct managerid from employee where managerid is not null);
+
+37. Get a list of all departments and their managers.
+
+select d.departmentName, e.EmployeeName as manager
+from department d
+left join employee e on d.managerid = e.employeeid;
+
+38. List employees who are assigned to more than on project
+
+select e.employeename from employee e
+inner join projectassignment pa on e.employeeid = pa.employeeid 
+group by employeename having count(pa.projectid) > 1;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
