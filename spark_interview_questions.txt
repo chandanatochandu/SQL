@@ -52,14 +52,15 @@ df.select(['name_col1','name_col2']).show()
 filtering columns
 df.filter(df["column_name"] > 10).show()
 df.filter(df["column_name"].like("%patten%")).show()
+df.filter((df['salary']<=2000) &/| (df['salary')>=1500)).select('name','age').show()
 
 df.withcoloumn('new_col_name',df['col_name']*2)
-df.drop(['col1','col2']).show()
 df.withcolumnRenamed('from_name','to_name')
+df.drop(['col1','col2']).show()
 df.na.drop()
 df.na.drop(how='any/all',thres=2,subset=['age','name'])
 df.na.fill("missing values",['age','name']).show()
-df.filter((df['salary']<=2000) &/| (df['salary')>=1500)).select('name','age').show()
+
 df.groupby('name').sum().max().min().mean().count()
 df.groupby('depatment').agg({'salary':'sum'})
 
